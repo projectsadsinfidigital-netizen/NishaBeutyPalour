@@ -17,9 +17,9 @@ export function Hero() {
             Your beauty, your moment
           </div>
 
-          <h1 className="max-w-xl font-serif text-5xl font-normal leading-[1.08] tracking-tight text-[#382b27] sm:text-6xl lg:text-7xl">
+          <h1 className="max-w-xl font-serif text-5xl font-semibold leading-[1.08] tracking-tight text-[#382b27] sm:text-6xl lg:text-7xl">
             Feel beautiful.
-            <span className="mt-1 block italic text-[#a66f68]">Feel like you.</span>
+            <span className="mt-1 block font-semibold not-italic text-[#a66f68]">Feel like you.</span>
           </h1>
 
           <p className="mt-7 max-w-lg text-base leading-8 text-[#75655e] sm:text-lg">
