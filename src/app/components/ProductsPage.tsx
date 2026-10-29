@@ -1,28 +1,12 @@
 import { useEffect, useState } from 'react';
 import { onValue, push, ref, set } from 'firebase/database';
-import { MessageCircle, Phone, ShoppingBag, Sparkles } from 'lucide-react';
+import { Phone, ShoppingBag, Sparkles } from 'lucide-react';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
-import { ImageWithFallback } from './figma/ImageWithFallback';
+import { ProductCard } from './ProductCard';
 import { database } from '../../lib/firebase';
+import { createWhatsAppUrl, openWhatsAppChat, salonPhone, displaySalonPhone } from '../../lib/contact';
 import type { SalonProduct } from '../../lib/products';
-
-const contactNumber = '+918623097761';
-const displayNumber = '+91 86230 97761';
-const defaultProductImage = 'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&w=1000&q=85';
-
-function formatPrice(price: number) {
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    maximumFractionDigits: 0,
-  }).format(price);
-}
-
-function createWhatsAppLink(product: SalonProduct) {
-  const message = `Hi, I am interested in ${product.name} (${formatPrice(product.price)}). Please share details on how to buy it.`;
-  return `https://wa.me/${contactNumber.slice(1)}?text=${encodeURIComponent(message)}`;
-}
 
 export function ProductsPage() {
   const [products, setProducts] = useState<SalonProduct[]>([]);
@@ -32,6 +16,7 @@ export function ProductsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formMessage, setFormMessage] = useState('');
   const [formError, setFormError] = useState('');
+  const [whatsAppFallbackUrl, setWhatsAppFallbackUrl] = useState('');
 
   useEffect(() => onValue(
     ref(database, 'products'),
@@ -39,8 +24,8 @@ export function ProductsPage() {
       const nextProducts: SalonProduct[] = [];
       snapshot.forEach((productSnapshot) => {
         const product = productSnapshot.val();
-        if (product.isAvailable) {
-          nextProducts.push({ ...product, id: productSnapshot.key });
+        if (product?.isAvailable && productSnapshot.key) {
+          nextProducts.push({ ...product, id: productSnapshot.key } as SalonProduct);
         }
       });
       setProducts(nextProducts.sort((first, second) => first.name.localeCompare(second.name)));
@@ -59,9 +44,19 @@ export function ProductsPage() {
     setIsSubmitting(true);
     setFormMessage('');
     setFormError('');
+    setWhatsAppFallbackUrl('');
+
+    const selectedProduct = products.find((product) => product.id === formData.productId);
+    const inquiryMessage = [
+      'New product inquiry',
+      `Name: ${formData.name.trim()}`,
+      `Phone: ${formData.phone.trim()}`,
+      `Product: ${selectedProduct?.name ?? 'Product recommendation'}`,
+      `Message: ${formData.message.trim()}`,
+    ].join('\n');
+    const whatsappOpened = openWhatsAppChat(inquiryMessage);
 
     try {
-      const selectedProduct = products.find((product) => product.id === formData.productId);
       const inquiryRef = push(ref(database, 'inquiries'));
       if (!inquiryRef.key) {
         throw new Error('Could not create an inquiry reference.');
@@ -77,10 +72,12 @@ export function ProductsPage() {
         createdAt: Date.now(),
       });
       setFormData({ name: '', phone: '', productId: '', message: '' });
-      setFormMessage('Thanks for reaching out! The salon will contact you shortly.');
+      setFormMessage('Your inquiry was saved. WhatsApp opened with your details—tap Send there to message the salon.');
+      if (!whatsappOpened) setWhatsAppFallbackUrl(createWhatsAppUrl(inquiryMessage));
     } catch (error) {
       console.error('Unable to send product inquiry:', error);
       setFormError('We could not send your message. Please try again or contact the salon by phone.');
+      if (!whatsappOpened) setWhatsAppFallbackUrl(createWhatsAppUrl(inquiryMessage));
     } finally {
       setIsSubmitting(false);
     }
@@ -103,7 +100,7 @@ export function ProductsPage() {
           </div>
         </section>
 
-        <section className="px-4 py-14 sm:px-6 sm:py-20" aria-labelledby="product-list-heading">
+        <section className="bg-[#faf8f4] px-4 py-12 sm:px-6 sm:py-16 lg:py-20" aria-labelledby="product-list-heading">
           <div className="mx-auto max-w-7xl">
             <h2 id="product-list-heading" className="sr-only">Available beauty products</h2>
             {isLoading ? (
@@ -115,51 +112,15 @@ export function ProductsPage() {
             ) : products.length === 0 ? (
               <div className="mx-auto max-w-xl rounded-3xl border border-border bg-card px-6 py-14 text-center shadow-sm">
                 <ShoppingBag className="mx-auto mb-4 h-10 w-10 text-primary" aria-hidden="true" />
-                <h2 className="mb-2 font-serif text-2xl text-foreground">Products coming soon</h2>
-                <p className="text-muted-foreground">Contact us and we’ll be happy to help you find the right product.</p>
+                <h2 className="mb-2 font-serif text-2xl text-foreground">Product details are being updated</h2>
+                <p className="text-muted-foreground">
+                  Contact us for current product recommendations and availability.
+                </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <div className="grid grid-cols-1 items-stretch gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
                 {products.map((product) => (
-                  <article
-                    key={product.id}
-                    className="group flex min-w-0 flex-col overflow-hidden rounded-3xl border border-border bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-                  >
-                    <div className="aspect-[4/3] overflow-hidden bg-secondary/40">
-                      <ImageWithFallback
-                        src={product.imageUrl || defaultProductImage}
-                        alt={product.name}
-                        loading="lazy"
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                    </div>
-                    <div className="flex flex-1 flex-col p-5 sm:p-6">
-                      <p className="mb-2 text-xs font-medium uppercase tracking-widest text-primary">{product.category}</p>
-                      <h3 className="mb-2 break-words font-serif text-xl text-foreground">{product.name}</h3>
-                      <p className="mb-5 flex-1 whitespace-pre-line break-words text-sm leading-relaxed text-muted-foreground">
-                        {product.description}
-                      </p>
-                      <p className="mb-5 text-2xl font-semibold text-foreground">{formatPrice(product.price)}</p>
-                      <div className="grid grid-cols-1 gap-2">
-                        <a
-                          href={createWhatsAppLink(product)}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-3 text-center font-medium text-white transition-colors hover:bg-green-700"
-                        >
-                          <MessageCircle className="h-4 w-4" aria-hidden="true" />
-                          Buy on WhatsApp
-                        </a>
-                        <a
-                          href={`tel:${contactNumber}`}
-                          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border px-4 py-3 text-center font-medium text-foreground transition-colors hover:border-primary hover:text-primary"
-                        >
-                          <Phone className="h-4 w-4" aria-hidden="true" />
-                          Call {displayNumber}
-                        </a>
-                      </div>
-                    </div>
-                  </article>
+                  <ProductCard key={product.id} product={product} />
                 ))}
               </div>
             )}
@@ -175,11 +136,11 @@ export function ProductsPage() {
                 Need help choosing, checking availability, or placing an order? Send us a message and our team will get back to you.
               </p>
               <a
-                href={`tel:${contactNumber}`}
+                href={`tel:${salonPhone}`}
                 className="inline-flex items-center gap-2 font-medium text-primary transition-colors hover:text-foreground"
               >
                 <Phone className="h-5 w-5" aria-hidden="true" />
-                Call {displayNumber}
+                Call {displaySalonPhone}
               </a>
             </div>
 
@@ -243,8 +204,32 @@ export function ProductsPage() {
                   placeholder="Ask us about a product, availability, or an order…"
                 />
               </div>
-              {formMessage && <p className="rounded-xl bg-green-50 p-4 text-green-800" role="status">{formMessage}</p>}
-              {formError && <p className="rounded-xl bg-red-50 p-4 text-red-800" role="alert">{formError}</p>}
+              {formMessage && (
+                <p className="rounded-xl bg-green-50 p-4 text-green-800" role="status">
+                  {formMessage}
+                  {whatsAppFallbackUrl && (
+                    <>
+                      {' '}
+                      <a className="font-semibold underline underline-offset-2" href={whatsAppFallbackUrl} target="_blank" rel="noreferrer">
+                        Open WhatsApp
+                      </a>
+                    </>
+                  )}
+                </p>
+              )}
+              {formError && (
+                <p className="rounded-xl bg-red-50 p-4 text-red-800" role="alert">
+                  {formError}
+                  {whatsAppFallbackUrl && (
+                    <>
+                      {' '}
+                      <a className="font-semibold underline underline-offset-2" href={whatsAppFallbackUrl} target="_blank" rel="noreferrer">
+                        Open WhatsApp
+                      </a>
+                    </>
+                  )}
+                </p>
+              )}
               <button
                 type="submit"
                 disabled={isSubmitting}

@@ -1,3 +1,4 @@
+import { ArrowRight } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 
 const galleryImages = [
@@ -29,28 +30,39 @@ const galleryImages = [
 
 export function Gallery() {
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-background" id="gallery">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl sm:text-5xl mb-4 text-foreground">Our Gallery</h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Explore our stunning transformations and creative artistry
-          </p>
+    <section className="bg-[#faf6f0] px-4 py-20 sm:px-6 sm:py-24 lg:px-8" id="gallery">
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-12 flex flex-col gap-5 md:mb-14 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="mb-4 text-xs font-medium uppercase tracking-[0.24em] text-[#9b6b60]">Little moments, lovely details</p>
+            <h2 className="font-serif text-4xl font-normal leading-tight text-[#382b27] sm:text-5xl">
+              A glimpse of <span className="italic text-[#a66f68]">our world.</span>
+            </h2>
+          </div>
+          <a
+            href="#booking"
+            className="group inline-flex items-center gap-2 text-sm font-medium text-[#8d5555] transition-colors hover:text-[#674040]"
+          >
+            Come see us
+            <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true" />
+          </a>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3">
           {galleryImages.map((image, index) => (
             <div
               key={index}
-              className="group relative overflow-hidden rounded-3xl aspect-square shadow-md hover:shadow-2xl transition-all duration-300"
+              className={`group relative aspect-[0.92] overflow-hidden rounded-2xl bg-[#e8d8c6] shadow-sm transition-all duration-300 hover:shadow-xl sm:rounded-[1.5rem] ${
+                index === 1 || index === 4 ? 'lg:translate-y-8' : ''
+              }`}
             >
               <ImageWithFallback
                 src={image.url}
                 alt={image.alt}
-                className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
-                <p className="text-white p-6 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+              <div className="absolute inset-0 flex items-end bg-gradient-to-t from-[#31231e]/60 via-transparent to-transparent opacity-80 transition-opacity duration-300 group-hover:opacity-100">
+                <p className="translate-y-1 px-4 pb-4 font-serif text-base text-white transition-transform duration-300 group-hover:translate-y-0 sm:px-6 sm:pb-6 sm:text-xl">
                   {image.alt}
                 </p>
               </div>

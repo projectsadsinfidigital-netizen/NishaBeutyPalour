@@ -1,4 +1,4 @@
-import { Star } from 'lucide-react';
+import { Quote, Star } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 
 const reviews = [
@@ -24,39 +24,43 @@ const reviews = [
 
 export function Reviews() {
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-secondary/30" id="reviews">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl sm:text-5xl mb-4 text-foreground">What Our Clients Say</h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Read the experiences of our happy and satisfied clients
+    <section className="bg-white px-4 py-20 sm:px-6 sm:py-24 lg:px-8" id="reviews">
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-12 max-w-2xl md:mb-14">
+          <p className="mb-4 text-xs font-medium uppercase tracking-[0.24em] text-[#9b6b60]">Kind words</p>
+          <h2 className="font-serif text-4xl font-normal leading-tight text-[#382b27] sm:text-5xl">
+            The best part is <span className="italic text-[#a66f68]">how you feel.</span>
+          </h2>
+          <p className="mt-4 text-base leading-7 text-[#75655e]">
+            A few notes from clients who have spent a little time with us.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
           {reviews.map((review, index) => (
             <div
               key={index}
-              className="bg-card p-8 rounded-3xl shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+              className="group flex flex-col rounded-[1.5rem] border border-[#eee5dd] bg-[#fbf9f6] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[#d7b6a8] hover:shadow-xl hover:shadow-[#604b41]/[0.07] sm:p-8"
             >
-              <div className="flex items-center mb-6">
-                <div className="w-16 h-16 rounded-full overflow-hidden mr-4">
+              <Quote className="mb-5 h-7 w-7 text-[#b8877b]/70" strokeWidth={1.5} aria-hidden="true" />
+              <p className="mb-7 flex-1 font-serif text-lg leading-8 text-[#594842]">“{review.review}”</p>
+              <div className="flex items-center border-t border-[#e9dfd7] pt-5">
+                <div className="mr-4 h-12 w-12 overflow-hidden rounded-full bg-[#e8d8c6]">
                   <ImageWithFallback
                     src={review.image}
                     alt={review.name}
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <div>
-                  <h4 className="text-lg text-foreground">{review.name}</h4>
-                  <div className="flex gap-1 mt-1">
+                <div className="min-w-0">
+                  <h4 className="text-sm font-medium text-[#493733]">{review.name}</h4>
+                  <div className="mt-1 flex gap-1" aria-label={`${review.rating} out of 5 stars`}>
                     {[...Array(review.rating)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-[#D4AF37] text-[#D4AF37]" />
+                      <Star key={i} className="h-3.5 w-3.5 fill-[#b99559] text-[#b99559]" aria-hidden="true" />
                     ))}
                   </div>
                 </div>
               </div>
-              <p className="text-muted-foreground leading-relaxed italic">"{review.review}"</p>
             </div>
           ))}
         </div>

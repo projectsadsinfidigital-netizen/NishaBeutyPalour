@@ -1,147 +1,129 @@
-import { useState, useEffect } from 'react';
-import { Menu, MessageCircle, Phone, X } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowUpRight, Menu, Phone, Sparkles, X } from 'lucide-react';
+import { salonPhone, displaySalonPhone } from '../../lib/contact';
 
-const contactNumber = '+918623097761';
-const displayNumber = '+91 86230 97761';
-const whatsappUrl = `https://wa.me/${contactNumber.slice(1)}?text=${encodeURIComponent('Hi, I would like to know more about your beauty services.')}`;
+const navLinks = [
+  { name: 'Home', href: '#home' },
+  { name: 'Services', href: '#services' },
+  { name: 'Our story', href: '#about' },
+  { name: 'Gallery', href: '#gallery' },
+  { name: 'Products', href: '/products' },
+];
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
+  const handleNavClick = (event: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (!href.startsWith('#')) return;
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const navLinks = [
-    { name: 'Home', href: '#home' },
-    { name: 'Services', href: '#services' },
-    { name: 'Products', href: '/products' },
-    { name: 'Book Now', href: '#booking' },
-    { name: 'Gallery', href: '#gallery' },
-    { name: 'Reviews', href: '#reviews' },
-    { name: 'About', href: '#about' },
-  ];
-
-  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-    e.preventDefault();
-    const element = document.querySelector(href);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const target = document.querySelector(href);
+    if (target) {
+      event.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       setIsOpen(false);
-    } else {
-      window.location.href = `/${href}`;
+      return;
     }
+
+    if (window.location.pathname !== '/') {
+      event.preventDefault();
+      window.location.assign(`/${href}`);
+    }
+    setIsOpen(false);
   };
 
   return (
-    <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-card/95 backdrop-blur-md shadow-lg' : 'bg-transparent'
-      }`}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
-          <a href="#home" className="flex shrink-0 items-center" onClick={(e) => handleNavClick(e, '#home')}>
-            <h1 className={`text-xl sm:text-2xl xl:text-3xl font-serif tracking-wider transition-colors ${
-              isScrolled ? 'text-foreground' : 'text-white'
-            }`}>
-              NISHIGANDHA
-            </h1>
-          </a>
+    <nav className="fixed inset-x-0 top-0 z-50 border-b border-[#e9dfd7] bg-[#fbf8f4]/95 shadow-sm shadow-[#493733]/5 backdrop-blur-md">
+      <div className="mx-auto flex h-[76px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:h-[84px] lg:px-8">
+        <a
+          href="#home"
+          onClick={(event) => handleNavClick(event, '#home')}
+          className="group flex shrink-0 items-center gap-3"
+          aria-label="Nishigandha Beauty Parlour home"
+        >
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#8d5555] text-white transition-transform duration-300 group-hover:rotate-12">
+            <Sparkles className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <span className="leading-tight">
+            <span className="block font-serif text-lg tracking-[0.12em] text-[#3d302b] sm:text-xl">NISHIGANDHA</span>
+            <span className="mt-1 block text-[9px] uppercase tracking-[0.28em] text-[#92786e]">Beauty Parlour</span>
+          </span>
+        </a>
 
-          <div className="hidden xl:flex items-center gap-6">
-            {navLinks.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-                onClick={link.href.startsWith('#') ? (e) => handleNavClick(e, link.href) : undefined}
-                className={`whitespace-nowrap transition-colors hover:text-primary ${
-                  isScrolled ? 'text-foreground' : 'text-white'
-                } ${link.name === 'Book Now' ? 'bg-primary text-white px-5 py-2 rounded-full hover:bg-primary/90' : ''}`}
-              >
-                {link.name}
-              </a>
-            ))}
-          </div>
-
-          <div className="hidden xl:flex items-center gap-3">
+        <div className="hidden items-center gap-7 lg:flex">
+          {navLinks.map((link) => (
             <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noreferrer"
-              aria-label={`Chat on WhatsApp at ${displayNumber}`}
-              className="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-green-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-green-700"
+              key={link.name}
+              href={link.href}
+              onClick={(event) => handleNavClick(event, link.href)}
+              className="text-sm text-[#685751] transition-colors duration-200 hover:text-[#8d5555]"
             >
-              <MessageCircle className="h-4 w-4" aria-hidden="true" />
-              WhatsApp
+              {link.name}
             </a>
-            <a
-              href={`tel:${contactNumber}`}
-              aria-label={`Call ${displayNumber}`}
-              className={`inline-flex items-center gap-2 whitespace-nowrap rounded-full border px-4 py-2.5 text-sm font-medium transition-colors ${
-                isScrolled
-                  ? 'border-border text-foreground hover:border-primary hover:text-primary'
-                  : 'border-white/60 text-white hover:bg-white/10'
-              }`}
-            >
-              <Phone className="h-4 w-4" aria-hidden="true" />
-              {displayNumber}
-            </a>
-          </div>
-
-          <button
-            type="button"
-            className={`xl:hidden rounded-full p-2 transition-colors ${
-              isScrolled ? 'text-foreground hover:bg-secondary' : 'text-white hover:bg-white/10'
-            }`}
-            onClick={() => setIsOpen(!isOpen)}
-            aria-label="Toggle menu"
-            aria-expanded={isOpen}
-          >
-            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+          ))}
         </div>
+
+        <div className="hidden items-center gap-4 lg:flex">
+          <a
+            href={`tel:${salonPhone}`}
+            aria-label={`Call ${displaySalonPhone}`}
+            className="inline-flex items-center gap-2 text-sm text-[#685751] transition-colors duration-200 hover:text-[#8d5555]"
+          >
+            <Phone className="h-4 w-4" aria-hidden="true" />
+            {displaySalonPhone}
+          </a>
+          <a
+            href="#booking"
+            onClick={(event) => handleNavClick(event, '#booking')}
+            className="group inline-flex items-center gap-2 rounded-full bg-[#8d5555] px-5 py-3 text-sm font-medium text-white transition-all duration-300 hover:bg-[#754343]"
+          >
+            Book a visit
+            <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden="true" />
+          </a>
+        </div>
+
+        <button
+          type="button"
+          className="rounded-full p-2 text-[#493733] transition-colors hover:bg-[#f0e5df] lg:hidden"
+          onClick={() => setIsOpen((open) => !open)}
+          aria-label={isOpen ? 'Close menu' : 'Open menu'}
+          aria-expanded={isOpen}
+          aria-controls="mobile-navigation"
+        >
+          {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </button>
       </div>
 
       {isOpen && (
-        <div className="xl:hidden border-t border-border bg-card/95 shadow-lg backdrop-blur-md">
-          <div className="mx-auto max-w-7xl space-y-2 px-4 py-5 sm:px-6 lg:px-8">
+        <div id="mobile-navigation" className="border-t border-[#e9dfd7] bg-[#fbf8f4] px-4 pb-5 pt-3 shadow-lg lg:hidden">
+          <div className="mx-auto max-w-7xl space-y-1">
             {navLinks.map((link) => (
               <a
                 key={link.name}
                 href={link.href}
-                onClick={link.href.startsWith('#') ? (e) => handleNavClick(e, link.href) : undefined}
-                className={`block rounded-xl px-4 py-3 text-foreground transition-colors hover:bg-secondary hover:text-primary ${
-                  link.name === 'Book Now' ? 'bg-primary text-center text-white hover:bg-primary/90 hover:text-white' : ''
-                }`}
+                onClick={(event) => {
+                  handleNavClick(event, link.href);
+                  if (!link.href.startsWith('#')) setIsOpen(false);
+                }}
+                className="block rounded-xl px-4 py-3 text-sm text-[#594842] transition-colors hover:bg-[#f0e5df] hover:text-[#8d5555]"
               >
                 {link.name}
               </a>
             ))}
-            <div className="grid grid-cols-1 gap-3 border-t border-border pt-4 sm:grid-cols-2">
-              <a
-                href={whatsappUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-3 font-medium text-white transition-colors hover:bg-green-700"
-              >
-                <MessageCircle className="h-5 w-5" aria-hidden="true" />
-                WhatsApp us
-              </a>
-              <a
-                href={`tel:${contactNumber}`}
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-border px-4 py-3 font-medium text-foreground transition-colors hover:border-primary hover:text-primary"
-              >
-                <Phone className="h-5 w-5" aria-hidden="true" />
-                Call {displayNumber}
-              </a>
-            </div>
+            <a
+              href="#booking"
+              onClick={(event) => handleNavClick(event, '#booking')}
+              className="mt-2 flex items-center justify-center gap-2 rounded-xl bg-[#8d5555] px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-[#754343]"
+            >
+              Book an appointment
+              <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+            </a>
+            <a
+              href={`tel:${salonPhone}`}
+              className="flex items-center justify-center gap-2 px-4 py-3 text-sm text-[#685751]"
+            >
+              <Phone className="h-4 w-4" aria-hidden="true" />
+              Call {displaySalonPhone}
+            </a>
           </div>
         </div>
       )}
